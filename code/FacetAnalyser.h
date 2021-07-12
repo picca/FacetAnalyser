@@ -51,7 +51,7 @@ private:
   // vtkIdType computeX(vtkIdType z);
   // vtkIdType computeY(vtkIdType z);
 
-  vtkIdType findSharedPoints(vtkIdType* pts0, vtkIdType* pts1, vtkIdType npts0, vtkIdType npts1, vtkIdList* ptIds);
+  vtkIdType findSharedPoints(const vtkIdType* pts0, const vtkIdType* pts1, vtkIdType npts0, vtkIdType npts1, vtkIdList* ptIds);
   vtkIdType ProbePoint(const double Origin[3], const double Spacing[3], const int SampleDimensions[3], const double *pp, vtkIdType *pi);
   void incBounds(double * ob, double nb[6], double factor);
   bool findTuple(vtkIdType value, vtkIdType & index, vtkIdTypeArray *array);
@@ -59,5 +59,3 @@ private:
 };
 
 #endif
-
-

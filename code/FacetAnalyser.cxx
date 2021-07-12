@@ -643,8 +643,8 @@ int FacetAnalyser::RequestData(
 		    &&
 		    findTuple(v, V, vtkIdTypeArray::SafeDownCast(output1->GetCellData()->GetScalars("PlaneIDs")))
 		    ){ // only meaningful if output1 has cells to corresponding facets
-		    vtkIdType *pts0, *pts1;
 		    vtkIdType npts0, npts1, nosc;
+		    const vtkIdType *pts0, *pts1;
 		    output1->GetCellPoints(U,npts0,pts0);
 		    output1->GetCellPoints(V,npts1,pts1);
 		    vtkSmartPointer<vtkIdList> idlst= vtkSmartPointer<vtkIdList>::New();
@@ -723,8 +723,8 @@ vtkIdType FacetAnalyser::CantorPairing(vtkIdType x, vtkIdType y){
 //     }
 
 
-vtkIdType FacetAnalyser::findSharedPoints(vtkIdType* pts0, vtkIdType* pts1, vtkIdType npts0, vtkIdType npts1, vtkIdList* ptIds){
-    
+vtkIdType FacetAnalyser::findSharedPoints(const vtkIdType* pts0, const vtkIdType* pts1, vtkIdType npts0, vtkIdType npts1, vtkIdList* ptIds){
+
     for (vtkIdType i= 0; i<npts0; i++)
         for (vtkIdType j= 0; j<npts1; j++)
             if(pts0[i] == pts1[j])
