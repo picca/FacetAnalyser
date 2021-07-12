@@ -1,19 +1,21 @@
-# Use the PLUGIN macro to create a plugin.
-paraview_add_plugin(FacetAnalyser
-  VERSION "1.0"
-  SOURCES FacetAnalyser.cxx vtkGaussianSplatterExtended.cxx
-  SERVER_MANAGER_XML FacetAnalyser.xml)
+set(classes
+  FacetAnalyser
+  vtkGaussianSplatterExtended
+  )
 
-target_include_directories(FacetAnalyser
+vtk_module_add_module(FacetAnalysers
+  FORCE_STATIC # Using FORCE_STATIC build the vtk module statically into the plugin library, to avoid confusion when loading
+  CLASSES ${classes})
+
+target_include_directories(FacetAnalysers
   PRIVATE ${PROJECT_SOURCE_DIR}/third-party/VtkGlue/include/
   )
-target_link_libraries(FacetAnalyser
+target_link_libraries(FacetAnalysers
   PRIVATE ${ITK_LIBRARIES}
   )
-install(
-  TARGETS FacetAnalyser
-  LIBRARY DESTINATION .
-  )
+
+paraview_add_server_manager_xmls(
+  XMLS  FacetAnalyser.xml)
 
 IF(BUILD_TESTING)
 

@@ -42,19 +42,28 @@ LINK_DIRECTORIES(${ITK_LIBRARY_DIRS})
 IF(BUILD_PLUGIN)
   FIND_PACKAGE(ParaView REQUIRED)
 
-  # Scan the plugin file in order to set up internal data structures for building
-  # plugins.
+  set("_paraview_plugin_default_${CMAKE_PROJECT_NAME}" ON)
   paraview_plugin_scan(
-    # The `paraview.plugin` file describing the plugin.
-    PLUGIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/code/paraview.plugin"
-    # A result variable for the (enabled) plugins found during the scan.
-    PROVIDES_PLUGINS plugins
-    # Enable plugins during this scan by default.
-    ENABLE_BY_DEFAULT ON)
+    PLUGIN_FILES      "${CMAKE_CURRENT_SOURCE_DIR}/Plugin/paraview.plugin"
+    PROVIDES_PLUGINS  plugins
+    REQUIRES_MODULES  required_modules)
+
+  foreach (module IN LISTS required_modules)
+    if (NOT TARGET "${module}")
+      message(#FATAL_ERROR
+        "Skipping example ${CMAKE_PROJECT_NAME}: Missing required module: "
+        "${module}")
+      return ()
+    endif ()
+  endforeach ()
 
   # Build the plugins discovered during the scan.
   paraview_plugin_build(
-    PLUGINS ${plugins})
+    RUNTIME_DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY_DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY_SUBDIRECTORY "${PARAVIEW_PLUGIN_SUBDIR}"
+    PLUGINS ${plugins}
+    )
 
   IF(BUILD_TESTING)
 
