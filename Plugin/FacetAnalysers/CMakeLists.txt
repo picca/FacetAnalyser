@@ -1,6 +1,7 @@
 set(classes
   FacetAnalyser
   vtkGaussianSplatterExtended
+  vtkMyHull
   )
 
 vtk_module_add_module(FacetAnalysers
@@ -24,6 +25,7 @@ IF(BUILD_TESTING)
     FacetAnalyser.cxx
     FacetAnalyserTest.cxx
     vtkGaussianSplatterExtended.cxx
+    vtkMyHull.cxx
     )
   target_include_directories(FacetAnalyserTest
     PRIVATE ${PROJECT_SOURCE_DIR}/third-party/VtkGlue/include/
@@ -47,6 +49,7 @@ IF(BUILD_EXAMPLE)
     FacetAnalyser.cxx
     FacetAnalyserCLI.cxx
     vtkGaussianSplatterExtended.cxx
+    vtkMyHull.cxx
     )
   target_include_directories(FacetAnalyserCLI
     PRIVATE ${PROJECT_SOURCE_DIR}/third-party/VtkGlue/include/

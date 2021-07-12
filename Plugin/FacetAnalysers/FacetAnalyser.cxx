@@ -1,5 +1,6 @@
 
 #include "FacetAnalyser.h"
+#include "vtkMyHull.h"
 
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -11,7 +12,7 @@
 #include <vtkCommand.h>
 
 #include <vtkMath.h>
-#include <vtkTriangleFilter.h> 
+#include <vtkTriangleFilter.h>
 #include <vtkPolyDataNormals.h>
 #include <vtkMeshQuality.h>
 #include "vtkGaussianSplatterExtended.h"
@@ -24,7 +25,6 @@
 #include <vtkDoubleArray.h>
 #include <vtkCellCenters.h>
 #include <vtkPlanes.h>
-#include <vtkHull.h>
 #include <vtkCleanPolyData.h>
 #include <vtkCellArray.h>
 
@@ -76,7 +76,7 @@ void FilterEventHandlerVTK(vtkObject* caller, long unsigned int eventId, void* c
 	    fprintf(stderr, "\r%s progress: %5.1f%%", filter->GetClassName(), 100.0 * filter->GetProgress());//stderr is flushed directly
 	    break;
 	case vtkCommand::EndEvent:
-	    std::cerr << std::endl << std::flush;   
+	    std::cerr << std::endl << std::flush;
 	    break;
 	}
     }
@@ -88,7 +88,7 @@ void FilterEventHandlerITK(itk::Object *caller, const itk::EventObject &event, v
     if(itk::ProgressEvent().CheckEvent(&event))
 	fprintf(stderr, "\r%s progress: %5.1f%%", filter->GetNameOfClass(), 100.0 * filter->GetProgress());//stderr is flushed directly
     else if(itk::EndEvent().CheckEvent(&event))
-	std::cerr << std::endl << std::flush;   
+	std::cerr << std::endl << std::flush;
     }
 
 //----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ int FacetAnalyser::RequestData(
 
     this->UpdateProgress(0.0);
 
-    double da= this->AngleUncertainty / 180.0 * vtkMath::Pi(); 
+    double da= this->AngleUncertainty / 180.0 * vtkMath::Pi();
     double f= 1/2./sin(da)/sin(da); //sin(da) corresponds to sigma
 
     double R;
@@ -148,10 +148,10 @@ int FacetAnalyser::RequestData(
     PDnormals0->ConsistencyOn(); // default! important for open surfaces
     PDnormals0->NonManifoldTraversalOn(); // default
     PDnormals0->FlipNormalsOff(); // default
-    PDnormals0->AutoOrientNormalsOff(); // default, only for closed surfaces	
+    PDnormals0->AutoOrientNormalsOff(); // default, only for closed surfaces
     PDnormals0->SplittingOff(); // default is On, i.e. use FeatureAngle
     PDnormals0->SetFeatureAngle(180); // no splitting, should not matter with SplittingOff
-    PDnormals0->ComputePointNormalsOff(); 
+    PDnormals0->ComputePointNormalsOff();
     PDnormals0->ComputeCellNormalsOn();
     PDnormals0->Update();
 
@@ -194,7 +194,7 @@ int FacetAnalyser::RequestData(
     Splatter->CappingOff(); //don't pad with 0
     Splatter->AddObserver(vtkCommand::AnyEvent, eventCallbackVTK);
     Splatter->Update();
- 
+
     this->UpdateProgress(0.2);
 
     vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
@@ -280,7 +280,7 @@ int FacetAnalyser::RequestData(
     ws->SetMarkerImage(labelImg);
     ws->AddObserver(itk::ProgressEvent(), eventCallbackITK);
     ws->AddObserver(itk::EndEvent(), eventCallbackITK);
-    ws->Update(); 
+    ws->Update();
 
     {//scoped for better consistency
     // extract the watershed lines and combine with the orginal markers
@@ -309,7 +309,7 @@ int FacetAnalyser::RequestData(
     this->UpdateProgress(0.5);
 
     ws->SetMarkWatershedLine(false); //no use for a border in higher stages
-    ws->SetFullyConnected(ws_conn); 
+    ws->SetFullyConnected(ws_conn);
 
     // to delete the background label
     typedef itk::ChangeLabelImageFilter<LabelImageType, LabelImageType> ChangeLabType;
@@ -356,7 +356,7 @@ int FacetAnalyser::RequestData(
 ////////////////////////Now label and grow the facet reagions... done.
 
 
-    ////spalter only single points with weights    
+    ////spalter only single points with weights
     vtkGaussianSplatterExtended *Splatter2 = vtkGaussianSplatterExtended::New();
     Splatter2->SetInputData(polydata0);
     Splatter2->SetSampleDimensions(this->SampleSize,this->SampleSize,this->SampleSize); //set the resolution of the final! volume
@@ -436,7 +436,7 @@ int FacetAnalyser::RequestData(
 
     for(vtkIdType k= 0; k < NumPolyDataPoints; k++){
         double pp[3];
-        Points->GetPoint(k, pp); 
+        Points->GetPoint(k, pp);
         vtkIdType pi[3];
         vtkIdType idx= ProbePoint(Splatter->GetOutput()->GetOrigin(), Splatter->GetOutput()->GetSpacing(), Splatter->GetSampleDimensions(), pp, pi);
 
@@ -458,7 +458,7 @@ int FacetAnalyser::RequestData(
         fId->InsertNextValue(tl);
         fPb->InsertNextValue(tv);
 
-	
+
 	vtkIdType fl= tl - 1;
 	if(fl >= 0){
 	    double cp[3], fp[3];
@@ -510,7 +510,7 @@ int FacetAnalyser::RequestData(
                 continue;
                 }
             }
-  
+
         double c[3], fw;
         //// Since GetCenterOfGravity(), GetCentroid() are in 3D the centres can lie off the unit sphere!
         //// The inverse of the length of the centre vector is therefor a measure of how concentrated/dispersed the label is and therefor how destinct a facet is
@@ -533,14 +533,14 @@ int FacetAnalyser::RequestData(
 
     /////////////create second output/////////////
 
-    if(NumFacets > 3){ // vtkHull only works with planes >=4 
+    if(NumFacets > 3){ // vtkMyHull only works with planes >=4
 	vtkSmartPointer<vtkPlanes> planes= vtkSmartPointer<vtkPlanes>::New();
 	planes->SetPoints(facetCenterPoints);
 	planes->SetNormals(facetNormals);
-	
+
 	vtkSmartPointer<vtkCleanPolyData> cleanFilter= vtkSmartPointer<vtkCleanPolyData>::New();
-	vtkSmartPointer<vtkHull> hull= vtkSmartPointer<vtkHull>::New();
-	
+	vtkSmartPointer<vtkMyHull> hull= vtkSmartPointer<vtkMyHull>::New();
+
 	hull->SetPlanes(planes);
 	if(this->OuterHull){
 	    hull->SetInputData(tinput);
@@ -554,22 +554,22 @@ int FacetAnalyser::RequestData(
 	    hull->GenerateHull(polydata1, nb);//replaced SetInputData and Update
 	    cleanFilter->SetInputData(polydata1);
 	    }
-	
+
 	cleanFilter->PointMergingOn();//this is why it's done
 	cleanFilter->ConvertPolysToLinesOn();
 	cleanFilter->SetTolerance(0.000001);//small tolerance needed for most hulls
-	cleanFilter->ToleranceIsAbsoluteOff();//relative tolerance 
+	cleanFilter->ToleranceIsAbsoluteOff();//relative tolerance
 	cleanFilter->Update();
-	
+
 	output1->ShallowCopy(cleanFilter->GetOutput());
 	}
     else{
-	vtkWarningMacro( << "WARNING: less than 4 facets found, no hull will be created, but data will be part of FieldData of the main output.");   
+	vtkWarningMacro( << "WARNING: less than 4 facets found, no hull will be created, but data will be part of FieldData of the main output.");
 	}
 
     vtkDataArray* facetCenters = facetCenterPoints->GetData();
     facetCenters->SetName("FacetCenters");
-   
+
     if(output1->GetNumberOfCells() == NumFacets){
 	output1->GetCellData()->SetNormals(facetNormals);
 	output1->GetCellData()->AddArray(facetCenters);
@@ -578,10 +578,10 @@ int FacetAnalyser::RequestData(
 	output1->GetCellData()->AddArray(absFacetSizes);
 	}
     else {
-	vtkWarningMacro( << "WARNING: Hull has less faces (" << output1->GetNumberOfCells() << ") than facets found (" << NumFacets << ")! Not assigning CellData to hull, but data will be part of FieldData of the main output.");   
+	vtkWarningMacro( << "WARNING: Hull has less faces (" << output1->GetNumberOfCells() << ") than facets found (" << NumFacets << ")! Not assigning CellData to hull, but data will be part of FieldData of the main output.");
 	}
 
-    ////some of the planes set as input for vtkHull can get lost
+    ////some of the planes set as input for vtkMyHull can get lost
     ////so set face-analyses also as FieldData to output0
     output0->GetFieldData()->AddArray(facetNormals);
     output0->GetFieldData()->AddArray(facetCenters);
@@ -592,7 +592,7 @@ int FacetAnalyser::RequestData(
     this->UpdateProgress(0.95);
 
     /////////////create second output field data/////////////
-    
+
     vtkSmartPointer<vtkIdTypeArray> cellPairingIds= vtkSmartPointer<vtkIdTypeArray>::New();
     cellPairingIds->SetNumberOfComponents(1);
     cellPairingIds->SetName ("cellPairingIds");
@@ -627,13 +627,13 @@ int FacetAnalyser::RequestData(
         for(vtkIdType u= 0; u < NumFacets - 1 ; u++){
             for(vtkIdType v= u + 1; v < NumFacets; v++){
                 double p0[3], p1[3];
-                facetNormals->GetTuple(u, p0); 
+                facetNormals->GetTuple(u, p0);
                 facetNormals->GetTuple(v, p1);
                 vtkMath::Normalize(p0);
                 vtkMath::Normalize(p1);
                 double angle= acos(vtkMath::Dot(p0, p1)) * 180.0 / vtkMath::Pi();
-                double aw= 2 / (1/relFacetSizes->GetTuple1(u) + 1/relFacetSizes->GetTuple1(v)); 
- 
+                double aw= 2 / (1/relFacetSizes->GetTuple1(u) + 1/relFacetSizes->GetTuple1(v));
+
                 cellPairingIds->InsertNextValue(CantorPairing(u+1,v+1));//for consistency: label 0 is for unfacetted regions in output0
                 interplanarAngles->InsertNextValue(angle);
                 angleWeights->InsertNextValue(aw);
@@ -653,7 +653,7 @@ int FacetAnalyser::RequestData(
 			lines->InsertNextCell(2);
 			lines->InsertCellPoint(idlst->GetId(0));
 			lines->InsertCellPoint(idlst->GetId(1));
-			
+
 			lcellPairingIds->InsertNextValue(CantorPairing(u+1,v+1));//for consistency: label 0 is for unfacetted regions in output0
 			linterplanarAngles->InsertNextValue(angle);
 			langleWeights->InsertNextValue(aw);
@@ -680,7 +680,7 @@ int FacetAnalyser::RequestData(
     if(lines->GetNumberOfCells()){ // only meaningful if lines got created
 	output2->SetPoints(output1->GetPoints());
 	output2->SetLines(lines);
-	
+
 	output2->GetCellData()->AddArray(lcellPairingIds);
 	output2->GetCellData()->AddArray(linterplanarAngles);
 	output2->GetCellData()->AddArray(langleWeights);
@@ -688,7 +688,7 @@ int FacetAnalyser::RequestData(
     else {
 	vtkWarningMacro( << "WARNING: Hull has less faces than facets found! Third output will be empty as well, because correspondence between lost face and facet is unclear, but data will be part of FieldData of the main output.");
 	}
-    
+
     this->UpdateProgress(1);
 
     return 1;
