@@ -4,9 +4,16 @@ paraview_add_plugin(FacetAnalyser
   SOURCES FacetAnalyser.cxx vtkGaussianSplatterExtended.cxx
   SERVER_MANAGER_XML FacetAnalyser.xml)
 
-target_link_libraries(FacetAnalyser PRIVATE ${ITK_LIBRARIES})
-install(TARGETS FacetAnalyser LIBRARY DESTINATION . )
-
+target_include_directories(FacetAnalyser
+  PRIVATE ${PROJECT_SOURCE_DIR}/third-party/VtkGlue/include/
+  )
+target_link_libraries(FacetAnalyser
+  PRIVATE ${ITK_LIBRARIES}
+  )
+install(
+  TARGETS FacetAnalyser
+  LIBRARY DESTINATION .
+  )
 
 IF(BUILD_TESTING)
 
@@ -15,6 +22,9 @@ IF(BUILD_TESTING)
     FacetAnalyser.cxx
     FacetAnalyserTest.cxx
     vtkGaussianSplatterExtended.cxx
+    )
+  target_include_directories(FacetAnalyserTest
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/VtkGlue/include/
     )
   target_link_libraries(FacetAnalyserTest
     PRIVATE ${ITK_LIBRARIES} ${VTK_LIBRARIES}
@@ -35,6 +45,9 @@ IF(BUILD_EXAMPLE)
     FacetAnalyser.cxx
     FacetAnalyserCLI.cxx
     vtkGaussianSplatterExtended.cxx
+    )
+  target_include_directories(FacetAnalyserCLI
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/VtkGlue/include/
     )
   target_link_libraries(FacetAnalyserCLI
     PRIVATE ${ITK_LIBRARIES} ${VTK_LIBRARIES}
