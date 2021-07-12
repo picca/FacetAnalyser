@@ -66,34 +66,3 @@ IF(BUILD_PLUGIN)
 
   ENDIF(BUILD_TESTING)
 ENDIF(BUILD_PLUGIN)
-
-IF(BUILD_TESTING)
-
-  ## build test programs
-  ADD_EXECUTABLE(FacetAnalyserTest
-    FacetAnalyser.cxx vtkGaussianSplatterExtended.cxx
-    FacetAnalyserTest.cxx)
-  TARGET_LINK_LIBRARIES(FacetAnalyserTest PRIVATE ${ITK_LIBRARIES} ${VTK_LIBRARIES})
-
-  ## run tests
-  ADD_TEST(NAME basicTest01 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/testing/ COMMAND FacetAnalyserTest 8faced-rhombic-dodecahedron_twinned_simplified.vtk)
-
-ENDIF(BUILD_TESTING)
-
-IF(BUILD_EXAMPLE)
-
-  # EXAMPLE ---------------------------------------------------------
-
-  ADD_EXECUTABLE(FacetAnalyserCLI
-    FacetAnalyser.cxx vtkGaussianSplatterExtended.cxx
-    FacetAnalyserCLI.cxx)
-  TARGET_LINK_LIBRARIES(FacetAnalyserCLI PRIVATE ${ITK_LIBRARIES} ${VTK_LIBRARIES})
-
-  #------------------------------------------------------------------
-
-  IF(BUILD_TESTING)
-
-    ADD_TEST( NAME basicExampleTest01 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/ COMMAND FacetAnalyserCLI 8faced-rhombic-dodecahedron_twinned_010_deformed_wss.vtp 51 15 0.2 0.001 2 8faced-rhombic-dodecahedron_twinned_010_deformed_wss_FA.vtp )
-
-  ENDIF(BUILD_TESTING)
-ENDIF(BUILD_EXAMPLE)
