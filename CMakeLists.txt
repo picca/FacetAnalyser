@@ -45,6 +45,7 @@ IF(BUILD_PLUGIN)
   set("_paraview_plugin_default_${CMAKE_PROJECT_NAME}" ON)
   paraview_plugin_scan(
     PLUGIN_FILES      "${CMAKE_CURRENT_SOURCE_DIR}/Plugin/paraview.plugin"
+    ENABLE_BY_DEFAULT ON
     PROVIDES_PLUGINS  plugins
     REQUIRES_MODULES  required_modules)
 
