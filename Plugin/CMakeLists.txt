@@ -9,7 +9,3 @@ target_include_directories(FacetAnalyser
 target_link_libraries(FacetAnalyser
   PRIVATE ${ITK_LIBRARIES}
   )
-install(
-  TARGETS FacetAnalyser
-  LIBRARY DESTINATION .
-  )
