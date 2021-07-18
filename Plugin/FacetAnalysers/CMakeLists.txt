@@ -10,10 +10,6 @@ vtk_module_add_module(FacetAnalysers
   FORCE_STATIC # Using FORCE_STATIC build the vtk module statically into the plugin library, to avoid confusion when loading
   CLASSES ${classes})
 
-target_link_libraries(FacetAnalysers
-  PRIVATE ${ITK_LIBRARIES}
-  )
-
 paraview_add_server_manager_xmls(
   XMLS  FacetAnalyser.xml)
 
@@ -24,9 +20,6 @@ add_executable(FacetAnalyserTest
   FacetAnalyserTest.cxx
   vtkGaussianSplatterExtended.cxx
   vtkMyHull.cxx
-  )
-target_link_libraries(FacetAnalyserTest
-  PRIVATE ${ITK_LIBRARIES} ${VTK_LIBRARIES}
   )
 
 add_test(
@@ -42,9 +35,6 @@ add_executable(FacetAnalyserCLI
   FacetAnalyserCLI.cxx
   vtkGaussianSplatterExtended.cxx
   vtkMyHull.cxx
-  )
-target_link_libraries(FacetAnalyserCLI
-  PRIVATE ${ITK_LIBRARIES} ${VTK_LIBRARIES}
   )
 
 add_test(
