@@ -17,19 +17,6 @@ set(BUILD_SHARED_LIBS ON)
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--disable-new-dtags") # use RPATH instead of RUNPATH (currently ignored on Debian-9), -WL tells gcc to pass option to the linker
 
-OPTION( BUILD_PLUGIN
-  "Build ParaView plugin"
-  ON )
-
-OPTION( BUILD_EXAMPLE
-  "Build example"
-  ON )
-
-OPTION( BUILD_TESTING
-  "Build tests"
-  ON )
-
-
 FIND_PACKAGE(ITK REQUIRED)
 INCLUDE(${ITK_USE_FILE})
 
@@ -39,49 +26,46 @@ LINK_DIRECTORIES(${ITK_LIBRARY_DIRS})
 #FIND_PACKAGE(VTK REQUIRED)
 #INCLUDE(${VTK_USE_FILE})
 
-IF(BUILD_PLUGIN)
-  FIND_PACKAGE(ParaView REQUIRED)
+FIND_PACKAGE(ParaView REQUIRED)
 
-  set("_paraview_plugin_default_${CMAKE_PROJECT_NAME}" ON)
-  paraview_plugin_scan(
-    PLUGIN_FILES      "${CMAKE_CURRENT_SOURCE_DIR}/Plugin/paraview.plugin"
-    ENABLE_BY_DEFAULT ON
-    PROVIDES_PLUGINS  plugins
-    REQUIRES_MODULES  required_modules)
+# build the plugin
 
-  foreach (module IN LISTS required_modules)
-    if (NOT TARGET "${module}")
-      message(#FATAL_ERROR
-        "Skipping example ${CMAKE_PROJECT_NAME}: Missing required module: "
-        "${module}")
-      return ()
-    endif ()
-  endforeach ()
+set("_paraview_plugin_default_${CMAKE_PROJECT_NAME}" ON)
+paraview_plugin_scan(
+  PLUGIN_FILES      "${CMAKE_CURRENT_SOURCE_DIR}/Plugin/paraview.plugin"
+  ENABLE_BY_DEFAULT ON
+  PROVIDES_PLUGINS  plugins
+  REQUIRES_MODULES  required_modules)
 
-  # Build the plugins discovered during the scan.
-  paraview_plugin_build(
-    RUNTIME_DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY_DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    LIBRARY_SUBDIRECTORY "${PARAVIEW_PLUGIN_SUBDIR}"
-    PLUGINS ${plugins}
-    )
+foreach (module IN LISTS required_modules)
+  if (NOT TARGET "${module}")
+    message(#FATAL_ERROR
+      "Skipping example ${CMAKE_PROJECT_NAME}: Missing required module: "
+      "${module}")
+    return ()
+  endif ()
+endforeach ()
 
-  IF(BUILD_TESTING)
+paraview_plugin_build(
+  RUNTIME_DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  LIBRARY_DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  LIBRARY_SUBDIRECTORY "${PARAVIEW_PLUGIN_SUBDIR}"
+  PLUGINS ${plugins}
+  )
 
-    add_test(
-      NAME basicPluginTest01
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/
-      COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2webgl.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ${PROJECT_SOURCE_DIR}/docs/demos/WebGL/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.webgl -p ${CMAKE_CURRENT_BINARY_DIR}/lib/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
-      )
+# tests
 
-    add_test(
-      NAME basicPluginTest02
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/
-      COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2x3d.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ../docs/demos/X3D/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.x3d -p ${CMAKE_CURRENT_BINARY_DIR}/lib/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
-      ) # relative path as it is stored in X3D
+add_test(
+  NAME basicPluginTest01
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/
+  COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2webgl.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ${PROJECT_SOURCE_DIR}/docs/demos/WebGL/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.webgl -p ${CMAKE_CURRENT_BINARY_DIR}/lib/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
+  )
 
-    set_tests_properties(basicPluginTest01 PROPERTIES
-      SKIP_REGULAR_EXCEPTION "ModuleNotFoundError: No module named 'paraview.web'")  # until paraview.web is available in Debian https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=991238
+add_test(
+  NAME basicPluginTest02
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/
+  COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2x3d.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ../docs/demos/X3D/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.x3d -p ${CMAKE_CURRENT_BINARY_DIR}/lib/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
+  ) # relative path as it is stored in X3D
 
-  ENDIF(BUILD_TESTING)
-ENDIF(BUILD_PLUGIN)
+set_tests_properties(basicPluginTest01 PROPERTIES
+  SKIP_REGULAR_EXCEPTION "ModuleNotFoundError: No module named 'paraview.web'")  # until paraview.web is available in Debian https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=991238
