@@ -56,8 +56,8 @@ def main():
 
     exporters= pvs.servermanager.createModule("exporters")
     # dir(exporters) # lists export modules: CSVExporter, CinemaExporter, GL2PSContextViewExporterBase, GL2PSContextViewExporterEPS, GL2PSContextViewExporterPDF, GL2PSContextViewExporterPS, GL2PSContextViewExporterSVG, GL2PSExporterBase, GL2PSRenderViewExporterBase, GL2PSRenderViewExporterEPS, GL2PSRenderViewExporterPDF, GL2PSRenderViewExporterPS, GL2PSRenderViewExporterSVG, POVExporter, VRMLExporter, WebGLExporter, X3DExporter, X3DExporterBinary
-    
-    exporter= exporters.WebGLExporter(FileName=args.output)
+
+    exporter= exporters.WebExporter(FileName=args.output)
     exporter.SetView(rv)
     exporter.Write()
 
@@ -71,4 +71,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
