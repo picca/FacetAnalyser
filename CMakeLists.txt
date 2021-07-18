@@ -27,7 +27,7 @@ OPTION( BUILD_EXAMPLE
 
 OPTION( BUILD_TESTING
   "Build tests"
-  OFF )
+  ON )
 
 
 FIND_PACKAGE(ITK REQUIRED)
@@ -80,7 +80,8 @@ IF(BUILD_PLUGIN)
       COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2x3d.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ../docs/demos/X3D/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.x3d -p ${CMAKE_CURRENT_BINARY_DIR}/lib/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
       ) # relative path as it is stored in X3D
 
-    set_tests_properties(basicPluginTest01 basicPluginTest02 PROPERTIES PASS_REGULAR_EXPRESSION "Export succeded")    ## regex-check because script itself fails with: Inconsistency detected by ld.so: dl-close.c: _dl_close: Assertion `map->l_init_called' failed!
+    set_tests_properties(basicPluginTest01 PROPERTIES
+      SKIP_REGULAR_EXCEPTION "ModuleNotFoundError: No module named 'paraview.web'")  # until paraview.web is available in Debian https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=991238
 
   ENDIF(BUILD_TESTING)
 ENDIF(BUILD_PLUGIN)
