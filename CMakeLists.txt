@@ -60,13 +60,13 @@ paraview_plugin_build(
 add_test(
   NAME basicPluginTest01
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/
-  COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2webgl.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ${PROJECT_SOURCE_DIR}/docs/demos/WebGL/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.webgl -p ${CMAKE_CURRENT_BINARY_DIR}/lib/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
+  COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2webgl.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ${PROJECT_SOURCE_DIR}/docs/demos/WebGL/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.webgl -p ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
   )
 
 add_test(
   NAME basicPluginTest02
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/
-  COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2x3d.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ../docs/demos/X3D/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.x3d -p ${CMAKE_CURRENT_BINARY_DIR}/lib/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
+  COMMAND pvpython ${PROJECT_SOURCE_DIR}/scripts/pvsm2x3d.py -i 8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.pvsm -o ../docs/demos/X3D/8faced-rhombic-dodecahedron_twinned_simp+def_PVplugin.x3d -p ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/${PARAVIEW_PLUGIN_SUBDIR}/FacetAnalyser/FacetAnalyser.so
   ) # relative path as it is stored in X3D
 
 set_tests_properties(basicPluginTest01 PROPERTIES
