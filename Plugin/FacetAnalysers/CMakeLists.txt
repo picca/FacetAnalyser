@@ -63,7 +63,7 @@ IF(BUILD_EXAMPLE)
     add_test(
       NAME basicExampleTest01
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/demos/
-      COMMAND FacetAnalyserCLI 8faced-rhombic-dodecahedron_twinned_010_deformed_wss.vtp 51 15 0.2 0.001 2 8faced-rhombic-dodecahedron_twinned_010_deformed_wss_FA.vtp
+      COMMAND FacetAnalyserCLI 8faced-rhombic-dodecahedron_twinned_010_deformed_wss.vtp 51 15 0.2 0.001 2 0 8faced-rhombic-dodecahedron_twinned_010_deformed_wss_FA.vtp
       )
 
   ENDIF(BUILD_TESTING)
